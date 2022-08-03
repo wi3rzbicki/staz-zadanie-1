@@ -7,6 +7,10 @@ from tqdm import tqdm
 URLC = "https://www.polskawliczbach.pl/Miasta"
 page = get(URLC)
 bs = BeautifulSoup(page.content, 'html.parser')
+rows = soup.tbody.find_all("tr")
+
+miasta = []
+
 table_rows = soup.find("tbody").find_all("tr")
 
 for row in tqdm(rows, desc="Scraping cities"):
@@ -16,6 +20,10 @@ for row in tqdm(rows, desc="Scraping cities"):
     columns = row.find_all("td")
     _miasto = {}
     _miasto["name"] = columns[1].a.text
+    _miasto["nazwa_uri"] = columns[1].a["href"]
+
+    resp = requests.get(_miasto["nazwa_uri"])
+    resp = BeautifulSoup(resp.text, "html.parser")
 
     #polozenie
 
@@ -27,29 +35,14 @@ for row in tqdm(rows, desc="Scraping cities"):
         "lon": float(polozenie[1].text)
         }
 
-    for li in powierzchnia:
-        if "Powierzchnia" in li.text:
-            _miasto["area"] = float(li.span.text[:-4].replace(",",".").replace(" ",""))
-
     del _miasto["nazwa_uri"]
 
     miasta.append(_miasto)
 
-with open ("text.json","w",encoding="utf-8") as f:
-    f.write(json.dumps(miasta, ensure_ascii=False))
-
-#for x in city:
-#    x = city
-#    tab = []
-#    tab.append(x)
-#URL = "https://www.polskawliczbach.pl/", city
-
-#data=
-
 URLW = "https://www.polskawliczbach.pl/Wsie"
 page2 = get(URLW)
 bs2 = BeautifulSoup(page2.content, 'html.parser')
-table_rows2 = soup.find("tbody").find_all("tr")
+rows2 = soup.tbody.find_all("tr")
 
 for row in table_rows2:
     village = row.find_all("td")[1].text
