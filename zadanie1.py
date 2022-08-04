@@ -1,56 +1,62 @@
 from bs4 import BeautifulSoup
-import requests
+from requests import get
 import csv
-import json
 from tqdm import tqdm
 
-URLC = "https://www.polskawliczbach.pl/Miasta"
-page = get(URLC)
-bs = BeautifulSoup(page.content, 'html.parser')
-rows = soup.tbody.find_all("tr")
-
-miasta = []
-
-table_rows = soup.find("tbody").find_all("tr")
-
-for row in tqdm(rows, desc="Scraping cities"):
+def get_cities():
     
-    #miasta
+    URLC = "https://www.polskawliczbach.pl/Miasta"
+    page = get(URLC)
+    bs = BeautifulSoup(page.content, 'html.parser')
+    rows = bs.tbody.find_all("tr")
 
-    columns = row.find_all("td")
-    _miasto = {}
-    _miasto["name"] = columns[1].a.text
-    _miasto["nazwa_uri"] = columns[1].a["href"]
+    for row in tqdm(rows, desc="Scraping cities"):
+    
+        #miasta
 
-    resp = requests.get(_miasto["nazwa_uri"])
-    resp = BeautifulSoup(resp.text, "html.parser")
+        columns = row.find_all("td")
+        _city = {}
+        _city["name"] = columns[1].a.text
+        _city["name"] = _city["name"].replace(' ', '_').replace('-', '_').replace('Ó', 'O').replace('ó', 'o').replace('Ę', 'E').replace('ę', 'e').replace('Ą', 'A').replace('ą', 'a').replace('Ś', 'S').replace('ś', 's').replace('Ł', 'L').replace('ł', 'l').replace('Ż', 'Z').replace('ż', 'z').replace('Ź', 'Z').replace('ź', 'z').replace('Ć', 'C').replace('ć', 'c').replace('Ń', 'N').replace('ń', 'n')
+
+        print(_city)
+
+get_cities()
+
+#
+    #_city["name_uri"] =  columns[1].a["href"]
+
+    #resp = get(_city["name_uri"])
+    #resp = BeautifulSoup(resp.text, "html.parser")
 
     #polozenie
 
-    polozenie = resp.find("div", {"id": "polozenie"})
-    polozenie = polozenie.find_all("div")[1]
-    polozenie = polozenie.li.find_all("span")
-    _miasto["coordinates"] = {
-        "lat": float(polozenie[0].text), 
-        "lon": float(polozenie[1].text)
-        }
+    #polozenie = resp.find("div", {"id": "polozenie"})
+    #polozenie = polozenie.find_all("div")[1]
+    #polozenie = polozenie.li.find_all("span")
+    #_city["coordinates"] = {
+    #    "lat": float(polozenie[0].text), 
+    #    "lon": float(polozenie[1].text)
+    #    }
 
-    del _miasto["nazwa_uri"]
+    #del _city["name_uri"]
 
-    miasta.append(_miasto)
+    #cities.append(_city)
 
-URLW = "https://www.polskawliczbach.pl/Wsie"
-page2 = get(URLW)
-bs2 = BeautifulSoup(page2.content, 'html.parser')
-rows2 = soup.tbody.find_all("tr")
+#cities = []
 
-for row in table_rows2:
-    village = row.find_all("td")[1].text
+#URLW = "https://www.polskawliczbach.pl/Wsie"
+#page2 = get(URLW)
+#bs2 = BeautifulSoup(page2.content, 'html.parser')
+#rows2 = bs2.tbody.find_all("tr") 
 
-f = open('path/to/csv_file', 'w', encoding='UTF8', newline='')
+#for row in table_rows2:
+#    village = row.find_all("td")[1].text
 
-writer = csv.writer(f)
+#f = open('path/to/csv_file', 'w', encoding='UTF8', newline='')
+
+#writer = csv.writer(f)
 
 #writer.writerow(data)
 
-f.close()
+#f.close()
