@@ -22,7 +22,7 @@ def get_cities():
 
         print(_city)
 
-get_cities()
+#get_cities()
 
 def get_geo():
     
@@ -32,43 +32,38 @@ def get_geo():
 
         _city["name"] = columns[1].a.text
         _city["name"] = _city["name"].replace(' ', '_').replace('-', '_').replace('Ó', 'O').replace('ó', 'o').replace('Ę', 'E').replace('ę', 'e').replace('Ą', 'A').replace('ą', 'a').replace('Ś', 'S').replace('ś', 's').replace('Ł', 'L').replace('ł', 'l').replace('Ż', 'Z').replace('ż', 'z').replace('Ź', 'Z').replace('ź', 'z').replace('Ć', 'C').replace('ć', 'c').replace('Ń', 'N').replace('ń', 'n')
+        if columns[3] == 'mazowieckie':
+            _city["name"] = _city["name"].replace('jozefow', 'jozefow_mazowieckie')
+        else:
+            _city["name"] = _city["name"].replace('jozefow', 'jozefow_lubelskie')
 
-
-        #_city["name_uri"] = "https://www.polskawliczbach.pl/"_city["name"]""
+        _city["name_uri"] = "https://www.polskawliczbach.pl/" + _city["name"]
 
         resp = get(_city["name_uri"])
         resp = BeautifulSoup(resp.text, "html.parser")
 
         #polozenie
 
-        geo = resp.find("div", {"id": "geo"})
+        geo = resp.find("div", {"id": "polozenie"})
         geo = geo.find_all("div")[1]
         geo = geo.li.find_all("span")
         _city["coordinates"] = {
-            "lat": float(geo[0].text), 
-            "lon": float(geo[1].text)
+            "E": float(geo[0].text), 
+            "N": float(geo[1].text)
             }
 
-#get_geo()
+        print(_city["name"],_city["coordinates"])
 
-#del _city["name_uri"]
+fieldnames = ['name', 'coordinates' ]
 
-    #cities.append(_city)
+get_geo()
 
-#cities = []
+rows = [
+    {'name': _city["name"],
+    'coordinates': _city["coordinates"]}
+]
 
-#URLW = "https://www.polskawliczbach.pl/Wsie"
-#page2 = get(URLW)
-#bs2 = BeautifulSoup(page2.content, 'html.parser')
-#rows2 = bs2.tbody.find_all("tr") 
-
-#for row in table_rows2:
-#    village = row.find_all("td")[1].text
-
-#f = open('path/to/csv_file', 'w', encoding='UTF8', newline='')
-
-#writer = csv.writer(f)
-
-#writer.writerow(data)
-
-#f.close()
+with open('cities.csv', 'w', encoding='UTF8', newline='') as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
